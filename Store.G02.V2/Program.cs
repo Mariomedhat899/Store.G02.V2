@@ -3,6 +3,7 @@ using Domain.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Periestence;
 using Periestence.Data.Contexts;
+using Services.Mapping.Products;
 using System.Threading.Tasks;
 
 namespace Store.G02.V2
@@ -21,6 +22,8 @@ namespace Store.G02.V2
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddAutoMapper(M => M.AddProfile(new ProductProfile()));
 
 
 
