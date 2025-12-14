@@ -1,12 +1,15 @@
 
+using Domain.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Periestence;
 using Periestence.Data.Contexts;
+using System.Threading.Tasks;
 
 namespace Store.G02.V2
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +20,23 @@ namespace Store.G02.V2
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+
+
+
             builder.Services.AddDbContext<StoreDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
             var app = builder.Build();
+
+      using  var scope = app.Services.CreateScope();
+
+            var DbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+
+          await  DbInitializer.InitializeAsync();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
