@@ -16,8 +16,8 @@ namespace Services.Mapping.Products
         public ProductProfile()
         {
             CreateMap<Product, ProductResponse>()
-                .ForMember(B => B.Brand, O => O.MapFrom(S => S.Brand.Name))
-                .ForMember(T => T.Brand, O => O.MapFrom(S => S.Type.Name));
+                .ForMember(D => D.Type, O => O.MapFrom(S => S.Type.Name))
+                .ForMember(D => D.Brand, O => O.MapFrom(S => S.Brand.Name));
 
             CreateMap<ProductBrand, BrandTypeResponse>();
             CreateMap<ProductType, BrandTypeResponse>();
