@@ -1,5 +1,6 @@
 ﻿using Domain.Contracts;
 using Domain.Entites;
+using Domain.Entites.Products;
 using Microsoft.EntityFrameworkCore;
 using Periestence.Data.Contexts;
 using System;
@@ -14,6 +15,13 @@ namespace Periestence.Repositories
     {
         public async Task<IEnumerable<TEntity>> GetAllAsync(bool ChangeTracker = false)
         {
+            if(typeof(TEntity) == typeof(Product))
+            {
+                return ChangeTracker ?
+                 await _context.Products.Include(P => P.Type).Include(P => P.Brand).ToListAsync() as IEnumerable<TEntity>
+                : await _context.Products.Include(P => P.Type).Include(P => P.Brand).AsNoTracking().ToListAsync() as IEnumerable<TEntity>;
+
+            }
            return ChangeTracker ? 
                  await _context.Set<TEntity>().ToListAsync()
                 : await _context.Set<TEntity>().AsNoTracking().ToListAsync();
@@ -24,6 +32,10 @@ namespace Periestence.Repositories
 
         public async Task<TEntity?> GetAsync(TKey key)
         {
+            if(typeof(TEntity) == typeof(Product))
+            {
+                return await _context.Products.Include(P => P.Type).Include(P => P.Brand).FirstOrDefaultAsync(P => P.Id == key as int?) as TEntity ;
+            }
             return await _context.Set<TEntity>().FindAsync(key);
         }
         public async Task AddAsync(TEntity entity)
