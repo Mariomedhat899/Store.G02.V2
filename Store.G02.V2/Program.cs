@@ -26,7 +26,8 @@ namespace Store.G02.V2
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IServiceManager, ServiceManager>();
-            builder.Services.AddAutoMapper(M => M.AddProfile(new ProductProfile()));
+            builder.Services.AddAutoMapper(M => M.AddProfile(new ProductProfile(builder.Configuration)));
+            
 
 
 
@@ -36,6 +37,8 @@ namespace Store.G02.V2
             });
 
             var app = builder.Build();
+
+            app.UseStaticFiles();
 
       using  var scope = app.Services.CreateScope();
 
