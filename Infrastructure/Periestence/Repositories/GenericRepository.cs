@@ -29,6 +29,10 @@ namespace Periestence.Repositories
 
 
         }
+        public async Task<IEnumerable<TEntity>> GetAllAsync(ISpecifications<TKey, TEntity> spec)
+        {
+          return await ApplySpecifications(spec).ToListAsync();
+        }
 
         public async Task<TEntity?> GetAsync(TKey key)
         {
@@ -37,6 +41,10 @@ namespace Periestence.Repositories
                 return await _context.Products.Include(P => P.Type).Include(P => P.Brand).FirstOrDefaultAsync(P => P.Id == key as int?) as TEntity ;
             }
             return await _context.Set<TEntity>().FindAsync(key);
+        }
+        public async Task<TEntity?> GetAsync(ISpecifications<TKey, TEntity> spec)
+        {
+            return await ApplySpecifications(spec).FirstOrDefaultAsync();
         }
         public async Task AddAsync(TEntity entity)
         {
@@ -52,6 +60,10 @@ namespace Periestence.Repositories
             _context.Set<TEntity>().Remove(entity);
         }
 
+        private IQueryable<TEntity> ApplySpecifications(ISpecifications<TKey,TEntity> spec)
+        {
+            return SpecificationsEvaluator.GetQuery(_context.Set<TEntity>(), spec);
+        }
 
     }
 }
