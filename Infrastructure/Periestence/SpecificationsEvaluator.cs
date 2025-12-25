@@ -22,6 +22,14 @@ namespace Periestence
                 query = query.Where(spec.Criteria);
             }
 
+            if(spec.OrderBy is not null)
+            {
+                query = query.OrderBy(spec.OrderBy);
+            }
+            else if(spec.OrderByDescending is not null)
+            {
+                query = query.OrderByDescending(spec.OrderByDescending);
+            }
            query = spec.Includes.Aggregate(query, (query, includeExpression) => query.Include(includeExpression));
 
 
