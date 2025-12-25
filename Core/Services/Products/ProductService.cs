@@ -15,9 +15,9 @@ namespace Services.Products
 {
     public class ProductService(IUnitOfWork _unitOfWork,IMapper _mapper) : IProductService
     {
-        public async Task<IEnumerable<ProductResponse>> GetAllProductsAsync()
+        public async Task<IEnumerable<ProductResponse>> GetAllProductsAsync(int? brandId, int? typeId)
         {
-            var spec = new ProductsWithBransAndTypesSpecifications(null);
+            var spec = new ProductsWithBransAndTypesSpecifications(brandId,typeId);
             
             var products = await _unitOfWork.GetRepository<int, Product>().GetAllAsync(spec);
             var result = _mapper.Map<IEnumerable<ProductResponse>>(products);
@@ -26,8 +26,8 @@ namespace Services.Products
         }
         public async Task<ProductResponse> GetProductByIdAsync(int id)
         {
-
-            var product = await _unitOfWork.GetRepository<int, Product>().GetAsync(id);
+            var spec = new ProductsWithBransAndTypesSpecifications(id);
+            var product = await _unitOfWork.GetRepository<int, Product>().GetAsync(spec);
             var result = _mapper.Map<ProductResponse>(product);
 
             return result;
