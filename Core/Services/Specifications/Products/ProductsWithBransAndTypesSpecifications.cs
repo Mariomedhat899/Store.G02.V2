@@ -10,13 +10,16 @@ namespace Services.Specifications.Products
 {
     public class ProductsWithBransAndTypesSpecifications : BaseSpecifications<int,Product>
     {
-        public ProductsWithBransAndTypesSpecifications(int? brandId, int? typeId,string? sort) : base
+        public ProductsWithBransAndTypesSpecifications(int? brandId, int? typeId,string? sort, string? search) : base
             (
             P =>
             (!brandId.HasValue || P.BrandId == brandId)
             &&
             (!typeId.HasValue  || P.TypeId == typeId)
+            &&
+            (string.IsNullOrEmpty(search) || P.Name.ToLower().Contains(search.ToLower()))
             )
+           
         {
             if (!string.IsNullOrEmpty(sort))
             {
