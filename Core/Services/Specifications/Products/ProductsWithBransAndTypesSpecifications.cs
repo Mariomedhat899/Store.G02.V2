@@ -16,7 +16,10 @@ namespace Services.Specifications.Products
             (!brandId.HasValue || P.BrandId == brandId)
             &&
             (!typeId.HasValue  || P.TypeId == typeId)
+            &&
+            (string.IsNullOrEmpty(search) || P.Name.ToLower().Contains(search.ToLower()))
             )
+           
         {
             if (!string.IsNullOrEmpty(sort))
             {
