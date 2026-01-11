@@ -15,6 +15,9 @@ namespace Services.Specifications
         public Expression<Func<TEntity, bool>>? Criteria { get; set; }
         public Expression<Func<TEntity, object>>? OrderBy { get; set; }
         public Expression<Func<TEntity, object>>? OrderByDescending { get; set; }
+        public int Skip { get; set; }
+        public int Take { get; set; }
+        public bool IsPagingation { get; set; }
 
         public BaseSpecifications(Expression<Func<TEntity, bool>>? expression)
         {
@@ -31,6 +34,13 @@ namespace Services.Specifications
         public void AddOrderByDescending(Expression<Func<TEntity, object>> orderByDescendingExpression)
         {
             OrderByDescending = orderByDescendingExpression;
+        }
+
+        public void ApplyPagingnation(int PageSize, int PageIndex)
+        {
+            Skip = (PageIndex -1) * PageSize;
+            Take = PageSize;
+            IsPagingation = true;
         }
     }
 }

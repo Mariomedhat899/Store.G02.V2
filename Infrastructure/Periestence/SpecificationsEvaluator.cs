@@ -30,7 +30,13 @@ namespace Periestence
             {
                 query = query.OrderByDescending(spec.OrderByDescending);
             }
-           query = spec.Includes.Aggregate(query, (query, includeExpression) => query.Include(includeExpression));
+
+            if(spec.IsPagingation)
+            {
+                query = query.Skip(spec.Skip).Take(spec.Take);
+            }
+
+            query = spec.Includes.Aggregate(query, (query, includeExpression) => query.Include(includeExpression));
 
 
             return query;

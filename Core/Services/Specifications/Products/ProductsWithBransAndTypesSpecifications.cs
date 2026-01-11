@@ -10,7 +10,7 @@ namespace Services.Specifications.Products
 {
     public class ProductsWithBransAndTypesSpecifications : BaseSpecifications<int,Product>
     {
-        public ProductsWithBransAndTypesSpecifications(int? brandId, int? typeId,string? sort, string? search) : base
+        public ProductsWithBransAndTypesSpecifications(int? brandId, int? typeId,string? sort, int? PageIndex, int? PageSize) : base
             (
             P =>
             (!brandId.HasValue || P.BrandId == brandId)
@@ -41,6 +41,15 @@ namespace Services.Specifications.Products
             {
                 AddOrderBy(P => P.Name);
             }
+
+
+            //pageIndex = 3
+            //pageSize = 5
+            //skip : 2*5 (pageindex -1 ) * pageSize
+            //take :5
+
+            ApplyPagingnation(PageSize.Value, PageIndex.Value);
+
             ApplyIncludes();
         }
         public ProductsWithBransAndTypesSpecifications(int id) : base(P => P.Id == id)
