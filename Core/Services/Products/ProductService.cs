@@ -4,10 +4,12 @@ using Domain.Entites.Products;
 using Services.Abstractions.Products;
 using Services.Specifications;
 using Services.Specifications.Products;
+using Shared;
 using Shared.Dtos.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,7 +17,7 @@ namespace Services.Products
 {
     public class ProductService(IUnitOfWork _unitOfWork,IMapper _mapper) : IProductService
     {
-        public async Task<IEnumerable<ProductResponse>> GetAllProductsAsync(ProductQueryParameters parameters)
+        public async Task<PaginationResponse<ProductResponse>> GetAllProductsAsync(ProductQueryParameters parameters)
         {
             var spec = new ProductsWithBransAndTypesSpecifications(parameters);
 
@@ -23,8 +25,10 @@ namespace Services.Products
             
             var products = await _unitOfWork.GetRepository<int, Product>().GetAllAsync(spec);
             var result = _mapper.Map<IEnumerable<ProductResponse>>(products);
+            var countSpec = new ProductCountSpecifications(parameters);
+            var count = await _unitOfWork.GetRepository<int, Product>().CountAsync(countSpec);
 
-            return result;
+            return new PaginationResponse<ProductResponse>(parameters.PageIndex,parameters.PageSize,count,result);
         }
         public async Task<ProductResponse> GetProductByIdAsync(int id)
         {
