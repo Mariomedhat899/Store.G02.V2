@@ -59,6 +59,10 @@ namespace Periestence.Repositories
         {
             _context.Set<TEntity>().Remove(entity);
         }
+        public async Task<int> CountAsync(ISpecifications<TKey, TEntity> spec)
+        {
+           return await ApplySpecifications(spec).CountAsync();
+        }
 
         private IQueryable<TEntity> ApplySpecifications(ISpecifications<TKey,TEntity> spec)
         {
