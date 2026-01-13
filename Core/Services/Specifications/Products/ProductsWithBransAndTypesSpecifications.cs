@@ -1,4 +1,5 @@
 ﻿using Domain.Entites.Products;
+using Shared.Dtos.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,21 +11,21 @@ namespace Services.Specifications.Products
 {
     public class ProductsWithBransAndTypesSpecifications : BaseSpecifications<int,Product>
     {
-        public ProductsWithBransAndTypesSpecifications(int? brandId, int? typeId,string? sort, int? PageIndex, int? PageSize, string? search) : base
+        public ProductsWithBransAndTypesSpecifications(ProductQueryParameters parameters) : base
             (
             P =>
-            (!brandId.HasValue || P.BrandId == brandId)
+            (!parameters.BrandId.HasValue || P.BrandId == parameters.BrandId)
             &&
-            (!typeId.HasValue  || P.TypeId == typeId)
+            (!parameters.TypeId.HasValue  || P.TypeId == parameters.TypeId)
             &&
-            (string.IsNullOrEmpty(search) || P.Name.ToLower().Contains(search.ToLower()))
+            (string.IsNullOrEmpty(parameters.Search) || P.Name.ToLower().Contains(parameters.Search.ToLower()))
            
             )
            
         {
-            if (!string.IsNullOrEmpty(sort))
+            if (!string.IsNullOrEmpty(parameters.Sorting))
             {
-                switch (sort.ToLower())
+                switch (parameters.Sorting.ToLower())
                 {
                     case "priceasc":
                         AddOrderBy(P => P.Price);
@@ -49,7 +50,7 @@ namespace Services.Specifications.Products
             //skip : 2*5 (pageindex -1 ) * pageSize
             //take :5
 
-            ApplyPagingnation(PageSize.Value, PageIndex.Value);
+            ApplyPagingnation(parameters.PageSize, parameters.PageIndex);
 
             ApplyIncludes();
         }
