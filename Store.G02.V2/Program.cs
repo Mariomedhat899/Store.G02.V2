@@ -1,11 +1,13 @@
 
 using Domain.Contracts;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Periestence;
 using Periestence.Data.Contexts;
 using Services.Abstractions.Services;
 using Services.Mapping.Products;
 using Services.Services;
+using Shared.ErrorModels;
 using Store.G02.V2.MiddleWares;
 using System.Threading.Tasks;
 
@@ -28,9 +30,27 @@ namespace Store.G02.V2
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IServiceManager, ServiceManager>();
             builder.Services.AddAutoMapper(M => M.AddProfile(new ProductProfile(builder.Configuration)));
-            
 
 
+            builder.Services.Configure<ApiBehaviorOptions>(configure =>
+            {
+                configure.InvalidModelStateResponseFactory = (actionContext) =>
+                {
+                    var errors = actionContext.ModelState.Where(M => M.Value.Errors.Any())
+                                                         .Select(M => new ValdationError()
+                                                         {
+                                                             FieldName = M.Key,
+                                                             Errors = M.Value.Errors.Select(E => E.ErrorMessage)
+                                                         }).ToList();
+                    var response = new ValidationErrorResponse()
+                    {
+                        Errors = errors
+                    };
+
+                    return new BadRequestObjectResult(response);
+                };
+            }
+            );
 
             builder.Services.AddDbContext<StoreDbContext>(options =>
             {
