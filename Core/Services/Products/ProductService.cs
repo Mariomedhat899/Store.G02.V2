@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Domain.Contracts;
 using Domain.Entites.Products;
+using Domain.Exceptions.NotFound;
 using Services.Abstractions.Products;
 using Services.Specifications;
 using Services.Specifications.Products;
@@ -34,7 +35,7 @@ namespace Services.Products
         {
             var spec = new ProductsWithBransAndTypesSpecifications(id);
             var product = await _unitOfWork.GetRepository<int, Product>().GetAsync(spec);
-            if (product is null) throw new Exception($"Product With Id: {id} Was Not Found");
+            if (product is null) throw new ProductNotFountException(id);
             var result = _mapper.Map<ProductResponse>(product);
 
 

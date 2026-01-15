@@ -35,8 +35,6 @@ namespace Presentation
             if(Id is null or 0) return BadRequest();
             var result = await _serviceManager.ProductService.GetProductByIdAsync(Id.Value);
 
-
-
             return Ok(result);
 
         }

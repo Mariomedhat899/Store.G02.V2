@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions.NotFound
 {
-    internal class NotFoundExeption
+    public class ProductNotFountException(int id) : 
+        NotFoundException($"Product With Id {id} Was Not Found !!")
     {
     }
 }
