@@ -34,7 +34,10 @@ namespace Services.Products
         {
             var spec = new ProductsWithBransAndTypesSpecifications(id);
             var product = await _unitOfWork.GetRepository<int, Product>().GetAsync(spec);
+            if (product is null) throw new Exception($"Product With Id: {id} Was Not Found");
             var result = _mapper.Map<ProductResponse>(product);
+
+
 
             return result;
         }

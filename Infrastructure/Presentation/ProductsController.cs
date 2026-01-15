@@ -36,7 +36,6 @@ namespace Presentation
             var result = await _serviceManager.ProductService.GetProductByIdAsync(Id.Value);
 
 
-            if (result is null) return NotFound();
 
             return Ok(result);
 
