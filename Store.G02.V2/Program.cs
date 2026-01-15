@@ -6,6 +6,7 @@ using Periestence.Data.Contexts;
 using Services.Abstractions.Services;
 using Services.Mapping.Products;
 using Services.Services;
+using Store.G02.V2.MiddleWares;
 using System.Threading.Tasks;
 
 namespace Store.G02.V2
@@ -39,6 +40,7 @@ namespace Store.G02.V2
             var app = builder.Build();
 
             app.UseStaticFiles();
+            app.UseMiddleware<GlobalErrorHandlingMiddleWare>();
 
       using  var scope = app.Services.CreateScope();
 
