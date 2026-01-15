@@ -17,7 +17,20 @@ namespace Store.G02.V2.MiddleWares
             try
             {
                await _next.Invoke(context);
-            }catch(Exception ex)
+
+                if(context.Response.StatusCode == 404) //Routing MiddleWare
+                {
+                    context.Response.ContentType = "application/json";
+                    var response = new ErrorDetails()
+                    {
+                        StatusCode = context.Response.StatusCode,
+                        ErrorMessage = $"The EndPoint {context.Request.Path} Was Not Found !!"
+                    };
+
+                    await context.Response.WriteAsJsonAsync(response);
+                }
+            }
+            catch(Exception ex)
             {
                 //Logic
                 //1-set status code
