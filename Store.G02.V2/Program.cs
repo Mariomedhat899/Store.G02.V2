@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Periestence;
 using Periestence.Data.Contexts;
+using Services;
 using Services.Abstractions.Services;
 using Services.Mapping.Products;
 using Services.Services;
 using Shared.ErrorModels;
+using Store.G02.V2.Extensions;
 using Store.G02.V2.MiddleWares;
 using System.Threading.Tasks;
 
@@ -19,69 +21,12 @@ namespace Store.G02.V2
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IServiceManager, ServiceManager>();
-            builder.Services.AddAutoMapper(M => M.AddProfile(new ProductProfile(builder.Configuration)));
-
-
-            builder.Services.Configure<ApiBehaviorOptions>(configure =>
-            {
-                configure.InvalidModelStateResponseFactory = (actionContext) =>
-                {
-                    var errors = actionContext.ModelState.Where(M => M.Value.Errors.Any())
-                                                         .Select(M => new ValdationError()
-                                                         {
-                                                             FieldName = M.Key,
-                                                             Errors = M.Value.Errors.Select(E => E.ErrorMessage)
-                                                         }).ToList();
-                    var response = new ValidationErrorResponse()
-                    {
-                        Errors = errors
-                    };
-
-                    return new BadRequestObjectResult(response);
-                };
-            }
-            );
-
-            builder.Services.AddDbContext<StoreDbContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
+            builder.Services.AddAllServices(builder.Configuration);
 
             var app = builder.Build();
 
-            app.UseStaticFiles();
-            app.UseMiddleware<GlobalErrorHandlingMiddleWare>();
 
-      using  var scope = app.Services.CreateScope();
-
-            var DbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-
-          await  DbInitializer.InitializeAsync();
-
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-
-            app.MapControllers();
+            await app.ConfigureMiddleWaresAsync();
 
             app.Run();
         }
