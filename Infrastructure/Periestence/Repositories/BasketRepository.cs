@@ -1,5 +1,7 @@
 ﻿using Domain.Contracts;
 using Domain.Entites.Baskets;
+using Domain.Exceptions.BadRequest;
+using Domain.Exceptions.NotFound;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -17,28 +19,30 @@ namespace Periestence.Repositories
         {
             var Redis= await _redis.StringGetAsync(id);
 
-            if (Redis.IsNullOrEmpty) return null;
+            if (Redis.IsNullOrEmpty) throw new BasketNotFoundExeption($"This Basket With id:{id} Was Not Found !!");
 
             var Basket = JsonSerializer.Deserialize<CustomerBasket>(Redis);
 
-            if(Basket is null) return null;
+            if(Basket is null) throw new JsonException($"Failed to deserialize basket data for Id: {id}. The data may be corrupted.");
             return Basket;
             
         }
         public async Task<CustomerBasket> CreateBasketAsync(CustomerBasket basket, TimeSpan duration)
         {
             var RedisValue = JsonSerializer.Serialize(basket);
-          var flag = await _redis.StringSetAsync(basket.Id, JsonSerializer.Serialize(basket),duration);
+          var flag = await _redis.StringSetAsync(basket.Id, RedisValue, duration);
 
-            if (!flag) return null;
+            if (!flag) throw new BasketBadRequestException();
 
             return await GetBasketAsync(basket.Id);
 
         }
 
-        public Task<bool> DeleteBasketAsync(string id)
+        public async Task<bool> DeleteBasketAsync(string id)
         {
-          return  _redis.KeyDeleteAsync(id);
+            var flag = await _redis.KeyExistsAsync(id);
+            if (!flag) throw new DeleteBasketBadRequestException(id);
+            return flag;
         }
 
     }

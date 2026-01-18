@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Services.Abstractions.Services;
+using Services.Mapping.Baskets;
 using Services.Mapping.Products;
 using Services.Services;
 using System;
@@ -18,6 +19,7 @@ namespace Services
 
            services.AddScoped<IServiceManager, ServiceManager>();
            services.AddAutoMapper(M => M.AddProfile(new ProductProfile(configuration)));
+           services.AddAutoMapper(M => M.AddProfile(new BasketProfile()));
 
             return services;
         }

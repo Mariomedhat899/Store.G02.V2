@@ -1,4 +1,5 @@
-﻿using Domain.Exceptions.NotFound;
+﻿using Domain.Exceptions.BadRequest;
+using Domain.Exceptions.NotFound;
 using Shared.ErrorModels;
 
 namespace Store.G02.V2.MiddleWares
@@ -37,7 +38,8 @@ namespace Store.G02.V2.MiddleWares
                 context.Response.StatusCode = ex switch
                 {
                     NotFoundException => StatusCodes.Status404NotFound,
-                    _=> StatusCodes.Status500InternalServerError
+                    BadRequestException => StatusCodes.Status400BadRequest,
+                    _ => StatusCodes.Status500InternalServerError
                 };
                 //2-set content type
                 context.Response.ContentType = "application/json";
