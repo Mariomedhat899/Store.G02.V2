@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Periestence.Data.Contexts;
+using Periestence.Repositories;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace Periestence
         {
             services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IBasketRepository, BasketRepository>();
             services.AddSingleton<IConnectionMultiplexer>(ServiceProvider =>
             ConnectionMultiplexer.Connect(configuration.GetConnectionString("RedisConnection"))
 
