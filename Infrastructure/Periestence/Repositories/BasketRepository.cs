@@ -42,7 +42,7 @@ namespace Periestence.Repositories
         {
             var flag = await _redis.KeyExistsAsync(id);
             if (!flag) throw new DeleteBasketBadRequestException(id);
-            return flag;
+            return await _redis.KeyDeleteAsync(id);
         }
 
     }
