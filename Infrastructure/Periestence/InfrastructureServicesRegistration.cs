@@ -20,6 +20,7 @@ namespace Periestence
             services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IBasketRepository, BasketRepository>();
+            services.AddScoped<ICacheRepository, CaheRepository>();
             services.AddSingleton<IConnectionMultiplexer>(ServiceProvider =>
             ConnectionMultiplexer.Connect(configuration.GetConnectionString("RedisConnection"))
 
