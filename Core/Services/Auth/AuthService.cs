@@ -3,11 +3,14 @@ using Domain.Exceptions.BadRequest;
 using Domain.Exceptions.NotFound;
 using Domain.Exceptions.UnAuthorized;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using Services.Abstractions.Auth;
 using Shared.Dtos.Auth;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,7 +31,7 @@ namespace Services.Auth
             {
                 Email = user.Email,
                 DisplayName = user.DisplayName,
-                Token = "ToDo"
+                Token = await GenerateTokenAsync(user)
             };
 
 
@@ -53,7 +56,7 @@ namespace Services.Auth
             {
                 Email = user.Email,
                 DisplayName = user.DisplayName,
-                Token = "ToDo"
+                Token = await GenerateTokenAsync(user)
             };
         }
 
@@ -68,6 +71,43 @@ namespace Services.Auth
 
 
             
+        }
+
+
+        private async Task<string> GenerateTokenAsync(AppUser user)
+        {
+            //Token:
+            //Header(Type,Algo)
+            //PayLoad(Claims)
+            //Signature(Key)
+            
+            var authClaims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.GivenName,user.DisplayName),
+                new Claim(ClaimTypes.Email,user.Email),
+                new Claim(ClaimTypes.MobilePhone,user.PhoneNumber)
+                
+
+            };
+            var roles = await _userManager.GetRolesAsync(user);
+            foreach (var role in roles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, role));
+            }
+            //StrongSecurityKeyForAuthenticationStrongSecurityKeyForAuthenticationStrongSecurityKeyForAuthenticationStrongSecurityKeyForAuthentication
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("6a4f32c1b8d9e0f2a4b6c8d0e2f4a6b8c0d2e4f6"));
+
+                var token = new JwtSecurityToken(
+                issuer: "https://localhost:7086",
+                audience: "MyStore",
+                claims: authClaims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+                );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+           
+
         }
     }
 }
