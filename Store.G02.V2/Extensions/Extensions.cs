@@ -3,11 +3,16 @@ using Domain.Entites.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Periestence;
 using Periestence.Identity.Contexts;
 using Services;
+using Shared;
 using Shared.ErrorModels;
 using Store.G02.V2.MiddleWares;
+using System.Text;
 
 namespace Store.G02.V2.Extensions
 {
@@ -26,6 +31,12 @@ namespace Store.G02.V2.Extensions
 
             services.AddIdentityServices();
 
+            services.Configure<JwtOptions>(configuration.GetSection("JwtOptions"));
+
+            services.AddAuthServices(configuration);
+
+
+
 
             return services;
         }
@@ -36,6 +47,33 @@ namespace Store.G02.V2.Extensions
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+
+            return services;
+        }
+        private static IServiceCollection AddAuthServices(this IServiceCollection services,IConfiguration configuration)
+        {
+            var jwtOptions = configuration.GetSection("JwtOptions").Get<JwtOptions>();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Bearer";
+                options.DefaultChallengeScheme = "Bearer";
+
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtOptions.Audience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+
+
+                };
+            });
 
             return services;
         }
@@ -100,8 +138,9 @@ namespace Store.G02.V2.Extensions
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+            app.UseAuthentication();
 
+            app.UseAuthorization();
 
             app.MapControllers();
 

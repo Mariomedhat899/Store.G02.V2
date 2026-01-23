@@ -3,8 +3,11 @@ using Domain.Exceptions.BadRequest;
 using Domain.Exceptions.NotFound;
 using Domain.Exceptions.UnAuthorized;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Services.Abstractions.Auth;
+using Shared;
 using Shared.Dtos.Auth;
 using System;
 using System.Collections.Generic;
@@ -16,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace Services.Auth
 {
-    public class AuthService(UserManager<AppUser> _userManager) : IAuthService
+    public class AuthService(UserManager<AppUser> _userManager,IOptions<JwtOptions> _options) : IAuthService
     {
         public async Task<UserResponse?> LogInAsync(LogInRequest request)
         {
@@ -94,14 +97,17 @@ namespace Services.Auth
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
             }
+
+            var jwtOptions =_options.Value; 
+
             //StrongSecurityKeyForAuthenticationStrongSecurityKeyForAuthenticationStrongSecurityKeyForAuthenticationStrongSecurityKeyForAuthentication
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("6a4f32c1b8d9e0f2a4b6c8d0e2f4a6b8c0d2e4f6"));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey));
 
                 var token = new JwtSecurityToken(
-                issuer: "https://localhost:7086",
-                audience: "MyStore",
+                issuer: jwtOptions.Issuer,
+                audience: jwtOptions.Audience,
                 claims: authClaims,
-                expires: DateTime.Now.AddMinutes(30),
+                expires: DateTime.Now.AddMinutes(jwtOptions.ExpirationInMinutes),
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
                 );
 
