@@ -1,5 +1,6 @@
 ﻿using Domain.Exceptions.BadRequest;
 using Domain.Exceptions.NotFound;
+using Domain.Exceptions.UnAuthorized;
 using Shared.ErrorModels;
 
 namespace Store.G02.V2.MiddleWares
@@ -39,6 +40,7 @@ namespace Store.G02.V2.MiddleWares
                 {
                     NotFoundException => StatusCodes.Status404NotFound,
                     BadRequestException => StatusCodes.Status400BadRequest,
+                    UnAuthorizedException => StatusCodes.Status401Unauthorized,
                     _ => StatusCodes.Status500InternalServerError
                 };
                 //2-set content type
