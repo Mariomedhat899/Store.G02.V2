@@ -1,6 +1,10 @@
 ﻿using Domain.Contracts;
+using Domain.Entites.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Periestence;
+using Periestence.Identity.Contexts;
 using Services;
 using Shared.ErrorModels;
 using Store.G02.V2.MiddleWares;
@@ -20,6 +24,8 @@ namespace Store.G02.V2.Extensions
 
             services.ConfigureApiBehaviourOptions();
 
+            services.AddIdentityServices();
+
 
             return services;
         }
@@ -30,6 +36,16 @@ namespace Store.G02.V2.Extensions
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+
+            return services;
+        }
+        private static IServiceCollection AddIdentityServices(this IServiceCollection services)
+        {
+            services.AddIdentityCore<AppUser>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            }).AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<IdentityStoreDbContext>();
 
             return services;
         }
@@ -99,6 +115,7 @@ namespace Store.G02.V2.Extensions
             var DbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
 
             await DbInitializer.InitializeAsync();
+            await DbInitializer.InitializeIdentityAsync();
             return app;
         }
 
