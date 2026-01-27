@@ -1,5 +1,6 @@
 ﻿using Domain.Contracts;
 using Domain.Entites.Identity;
+using Domain.Entites.Orders;
 using Domain.Entites.Products;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,17 @@ namespace Periestence
             if( _context.Database.GetPendingMigrationsAsync().GetAwaiter().GetResult().Any())await _context.Database.MigrateAsync();
 
 
+          if(!await _context.DeliveryMethods.AnyAsync())
+            {
+                var DeliveryData = await File.ReadAllTextAsync(@"..\Infrastructure\Periestence\Data\DataSeeding\delivery.json");
+
+                var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(DeliveryData);
+
+                if (deliveryMethods is not null && deliveryMethods.Count > 0)
+                    await _context.DeliveryMethods.AddRangeAsync(deliveryMethods);
+                
+
+            }
           if(!await _context.ProductBrands.AnyAsync())
             {
                 var brandData = await File.ReadAllTextAsync(@"..\Infrastructure\Periestence\Data\DataSeeding\brands.json");
