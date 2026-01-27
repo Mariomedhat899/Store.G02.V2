@@ -44,6 +44,7 @@ namespace Presentation
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorDetails))]
+        [Cache(180)]
         [Authorize]
 
         public async Task<ActionResult<ProductResponse>> GetProductById(int? Id)
@@ -61,6 +62,7 @@ namespace Presentation
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<BrandTypeResponse>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
+        [Cache(180)]
         [Authorize]
 
         public async Task<ActionResult<BrandTypeResponse>> GetAllProductTypes()
@@ -78,6 +80,7 @@ namespace Presentation
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<BrandTypeResponse>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
+        [Cache(180)]
         [Authorize]
 
         public async Task<ActionResult<BrandTypeResponse>> GetAllProductBrands()
