@@ -1,12 +1,8 @@
 ﻿using Services.Abstractions.Auth;
 using Services.Abstractions.Baskets;
 using Services.Abstractions.Cache;
+using Services.Abstractions.Orders;
 using Services.Abstractions.Products;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.Abstractions.Services
 {
@@ -17,5 +13,7 @@ namespace Services.Abstractions.Services
         IBasketService BasketService { get; }
         ICacheService CacheService { get; }
         IAuthService AuthService { get; }
+
+        IOrderService OrderService { get; }
     }
 }
