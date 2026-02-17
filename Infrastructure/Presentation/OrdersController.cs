@@ -21,5 +21,39 @@ namespace Presentation
 
             return Ok(result);
         }
+
+        //Get All Delivery Methods
+
+        [HttpGet("DeliveryMethods")]
+        public async Task<IActionResult> GetAllDeliveryMethods()
+        {
+            var deliveryMethods = await _serviceManager.OrderService.GetAllDeliveyMethodsAsync();
+
+            return Ok(deliveryMethods);
+        }
+
+        //Get All Orders For User
+
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetOrdersForSpecificUser()
+        {
+            var userEmailClaim = User.FindFirst(ClaimTypes.Email);
+
+            var orders = await _serviceManager.OrderService.GetOrdesForSpecificUserAsync(userEmailClaim.Value);
+
+            return Ok(orders);
+        }
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetOrderByIdForSpecificUser(Guid id)
+        {
+            var userEmailClaim = User.FindFirst(ClaimTypes.Email);
+
+            var orders = await _serviceManager.OrderService.GetOrderByIdForSpecificUserAsync(id, userEmailClaim.Value);
+
+            return Ok(orders);
+        }
     }
 }
