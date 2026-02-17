@@ -9,7 +9,7 @@ using Shared.Dtos.Orders;
 
 namespace Services.Orders
 {
-    public class OrderServices(IUnitOfWork _unitOfWork, IMapper _mapper, IBasketRepository _basketRepository) : IOrderService
+    public class OrderService(IUnitOfWork _unitOfWork, IMapper _mapper, IBasketRepository _basketRepository) : IOrderService
     {
         public async Task<OrderResponse?> CreateOrderAsync(OrderRequest request, string userEmail)
         {
