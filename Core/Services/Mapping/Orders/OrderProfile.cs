@@ -18,6 +18,8 @@ namespace Services.Mapping.Orders
                 .ForMember(D => D.ProductId, O => O.MapFrom(S => S.Product.ProductID))
                 .ForMember(D => D.ProductName, O => O.MapFrom(S => S.Product.ProductName))
                 .ForMember(D => D.PictureUrl, O => O.MapFrom(S => S.Product.PictureUrl));
+
+            CreateMap<DeliveryMethod, DeliveyMethodResponse>();
         }
     }
 }
