@@ -1,9 +1,4 @@
 ﻿using Shared.Dtos.Auth;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.Abstractions.Auth
 {
@@ -12,5 +7,11 @@ namespace Services.Abstractions.Auth
         Task<UserResponse?> LogInAsync(LogInRequest request);
         Task<UserResponse?> RegisterAsync(RegisterRequest request);
         Task DeleteAsync(string Email);
+
+        Task<bool> CheckEmailExistAsync(string email);
+
+        Task<UserResponse?> GetCurrentUserAsync(string email);
+        Task<AddressDto?> GetCurrentUserAddressAsync(string email);
+        Task<AddressDto?> UpdateCurrentUserAddressAsync(AddressDto request, string email);
     }
 }

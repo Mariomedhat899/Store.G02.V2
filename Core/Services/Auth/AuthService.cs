@@ -1,32 +1,86 @@
-﻿using Domain.Entites.Identity;
+﻿using AutoMapper;
+using Domain.Entites.Identity;
 using Domain.Exceptions.BadRequest;
 using Domain.Exceptions.NotFound;
 using Domain.Exceptions.UnAuthorized;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Services.Abstractions.Auth;
 using Shared;
 using Shared.Dtos.Auth;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.Auth
 {
-    public class AuthService(UserManager<AppUser> _userManager,IOptions<JwtOptions> _options) : IAuthService
+    public class AuthService(UserManager<AppUser> _userManager, IOptions<JwtOptions> _options, IMapper _mapper) : IAuthService
     {
+        public async Task<bool> CheckEmailExistAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email) != null;
+        }
+
+        public async Task<UserResponse?> GetCurrentUserAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null) throw new UserNotFoundException(email);
+
+            return new UserResponse()
+            {
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                Token = await GenerateTokenAsync(user)
+            };
+        }
+
+        public async Task<AddressDto?> GetCurrentUserAddressAsync(string email)
+        {
+            // await _userManager.FindByEmailAsync(email); this function dose not load the navigation propertie 
+            var user = await _userManager.Users.Include(U => U.Adress).FirstOrDefaultAsync(U => U.Email.ToLower() == email.ToLower());
+
+            if (user is null) throw new UserNotFoundException(email);
+
+            return _mapper.Map<AddressDto>(user.Adress);
+        }
+
+        public async Task<AddressDto?> UpdateCurrentUserAddressAsync(AddressDto request, string email)
+        {
+            var user = await _userManager.Users.Include(U => U.Adress).FirstOrDefaultAsync(U => U.Email.ToLower() == email.ToLower());
+
+            if (user is null) throw new UserNotFoundException(email);
+
+            if (user.Adress is null)
+            {
+                //Create New Address
+
+                user.Adress = _mapper.Map<Address>(request);
+            }
+            else
+            {
+                //Update The Current Address
+
+                user.Adress.FirstName = request.FirstName;
+                user.Adress.LastName = request.LastName;
+                user.Adress.Street = request.Street;
+                user.Adress.City = request.City;
+                user.Adress.Country = request.Country;
+            }
+
+            await _userManager.UpdateAsync(user);
+
+            return _mapper.Map<AddressDto>(user.Adress);
+        }
+
         public async Task<UserResponse?> LogInAsync(LogInRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user is null) throw new UserNotFoundException(request.Email);
 
-          var flag = await  _userManager.CheckPasswordAsync(user, request.Password);
+            var flag = await _userManager.CheckPasswordAsync(user, request.Password);
 
             if (!flag) throw new UnAuthorizedException();
 
@@ -73,7 +127,7 @@ namespace Services.Auth
             if (!result.Succeeded) throw new Exception("Attemped Failed to Delete This User");
 
 
-            
+
         }
 
 
@@ -83,13 +137,13 @@ namespace Services.Auth
             //Header(Type,Algo)
             //PayLoad(Claims)
             //Signature(Key)
-            
+
             var authClaims = new List<Claim>()
             {
                 new Claim(ClaimTypes.GivenName,user.DisplayName),
                 new Claim(ClaimTypes.Email,user.Email),
                 new Claim(ClaimTypes.MobilePhone,user.PhoneNumber)
-                
+
 
             };
             var roles = await _userManager.GetRolesAsync(user);
@@ -98,22 +152,23 @@ namespace Services.Auth
                 authClaims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var jwtOptions =_options.Value; 
+            var jwtOptions = _options.Value;
 
             //StrongSecurityKeyForAuthenticationStrongSecurityKeyForAuthenticationStrongSecurityKeyForAuthenticationStrongSecurityKeyForAuthentication
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey));
 
-                var token = new JwtSecurityToken(
-                issuer: jwtOptions.Issuer,
-                audience: jwtOptions.Audience,
-                claims: authClaims,
-                expires: DateTime.Now.AddMinutes(jwtOptions.ExpirationInMinutes),
-                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-                );
+            var token = new JwtSecurityToken(
+            issuer: jwtOptions.Issuer,
+            audience: jwtOptions.Audience,
+            claims: authClaims,
+            expires: DateTime.Now.AddMinutes(jwtOptions.ExpirationInMinutes),
+            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+            );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-           
+
 
         }
+
     }
 }
