@@ -50,7 +50,7 @@ namespace Services.Orders
             var subTotal = orderItems.Sum(OI => OI.Price * OI.Quantity);
 
             //Create Order Object
-            var order = new Order(userEmail, orderAddress, deliveryMethod, orderItems, subTotal);
+            var order = new Order(userEmail, orderAddress, deliveryMethod, orderItems, subTotal, basket.PaymentIntentId);
             //Add order In Database
             await _unitOfWork.GetRepository<Guid, Order>().AddAsync(order);
 

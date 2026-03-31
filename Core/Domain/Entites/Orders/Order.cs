@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Entites.Orders
+﻿namespace Domain.Entites.Orders
 {
     public class Order : BaseEntity<Guid>
     {
@@ -13,13 +6,14 @@ namespace Domain.Entites.Orders
         {
         }
 
-        public Order(string userEmail, OrderAddress shippingAddress, DeliveryMethod deliveryMethod, ICollection<OrderItem> items, decimal subTotal)
+        public Order(string userEmail, OrderAddress shippingAddress, DeliveryMethod deliveryMethod, ICollection<OrderItem> Items, decimal subTotal, string? PaymentIntenetId)
         {
             UserEmail = userEmail;
             ShippingAddress = shippingAddress;
             DeliveryMethod = deliveryMethod;
-            this.items = items;
+            items = Items;
             SubTotal = subTotal;
+            PaymentIntentId = PaymentIntenetId;
         }
 
 
@@ -41,5 +35,7 @@ namespace Domain.Entites.Orders
         //public Decimal Total { get; set; } // = SubTotal + Delivary Method Cost
 
         public decimal GetTotal() => SubTotal + DeliveryMethod.Price;
+
+        public string? PaymentIntentId { get; set; }
     }
 }
