@@ -1,11 +1,8 @@
 ﻿using Domain.Contracts;
 using Domain.Entites.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Experimental;
 using Periestence;
 using Periestence.Identity.Contexts;
 using Services;
@@ -18,7 +15,7 @@ namespace Store.G02.V2.Extensions
 {
     public static class Extensions
     {
-        public static IServiceCollection AddAllServices(this IServiceCollection services,IConfiguration configuration)
+        public static IServiceCollection AddAllServices(this IServiceCollection services, IConfiguration configuration)
         {
             // Add services to the container.
             services.AddWebServices();
@@ -35,6 +32,18 @@ namespace Store.G02.V2.Extensions
 
             services.AddAuthServices(configuration);
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+
+                });
+
+            });
+
 
 
 
@@ -50,7 +59,7 @@ namespace Store.G02.V2.Extensions
 
             return services;
         }
-        private static IServiceCollection AddAuthServices(this IServiceCollection services,IConfiguration configuration)
+        private static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration)
         {
             var jwtOptions = configuration.GetSection("JwtOptions").Get<JwtOptions>();
 
@@ -89,25 +98,25 @@ namespace Store.G02.V2.Extensions
         }
         private static IServiceCollection ConfigureApiBehaviourOptions(this IServiceCollection services)
         {
-             services.Configure<ApiBehaviorOptions>(configure =>
-            {
-                configure.InvalidModelStateResponseFactory = (actionContext) =>
-                {
-                    var errors = actionContext.ModelState.Where(M => M.Value.Errors.Any())
-                                                         .Select(M => new ValdationError()
-                                                         {
-                                                             FieldName = M.Key,
-                                                             Errors = M.Value.Errors.Select(E => E.ErrorMessage)
-                                                         }).ToList();
-                    var response = new ValidationErrorResponse()
-                    {
-                        Errors = errors
-                    };
+            services.Configure<ApiBehaviorOptions>(configure =>
+           {
+               configure.InvalidModelStateResponseFactory = (actionContext) =>
+               {
+                   var errors = actionContext.ModelState.Where(M => M.Value.Errors.Any())
+                                                        .Select(M => new ValdationError()
+                                                        {
+                                                            FieldName = M.Key,
+                                                            Errors = M.Value.Errors.Select(E => E.ErrorMessage)
+                                                        }).ToList();
+                   var response = new ValidationErrorResponse()
+                   {
+                       Errors = errors
+                   };
 
-                    return new BadRequestObjectResult(response);
-                };
-            }
-                        );
+                   return new BadRequestObjectResult(response);
+               };
+           }
+                       );
 
 
             return services;
@@ -123,7 +132,7 @@ namespace Store.G02.V2.Extensions
 
 
             app.UseStaticFiles();
-            
+
             app.UseGlobalErrorHandling();
 
             await app.SeedData();
@@ -136,13 +145,17 @@ namespace Store.G02.V2.Extensions
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("AllowAll");
+
             app.UseHttpsRedirection();
+
 
             app.UseAuthentication();
 
             app.UseAuthorization();
 
             app.MapControllers();
+
 
             return app;
         }

@@ -1,16 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Attributes;
 using Services.Abstractions.Services;
 using Shared;
 using Shared.Dtos.Products;
 using Shared.ErrorModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 
 namespace Presentation
@@ -26,8 +20,8 @@ namespace Presentation
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
         [Cache(180)]
-        [Authorize]
-        public async Task<ActionResult<PaginationResponse<ProductResponse>>> GetAllProducts([FromQuery]ProductQueryParameters parameters)
+
+        public async Task<ActionResult<PaginationResponse<ProductResponse>>> GetAllProducts([FromQuery] ProductQueryParameters parameters)
         {
             var result = await _serviceManager.ProductService.GetAllProductsAsync(parameters);
 
@@ -45,11 +39,11 @@ namespace Presentation
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorDetails))]
         [Cache(180)]
-        [Authorize]
+
 
         public async Task<ActionResult<ProductResponse>> GetProductById(int? Id)
         {
-            if(Id is null or 0) return BadRequest();
+            if (Id is null or 0) return BadRequest();
             var result = await _serviceManager.ProductService.GetProductByIdAsync(Id.Value);
 
             return Ok(result);
@@ -63,7 +57,7 @@ namespace Presentation
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
         [Cache(180)]
-        [Authorize]
+
 
         public async Task<ActionResult<BrandTypeResponse>> GetAllProductTypes()
         {
@@ -81,7 +75,7 @@ namespace Presentation
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
         [Cache(180)]
-        [Authorize]
+
 
         public async Task<ActionResult<BrandTypeResponse>> GetAllProductBrands()
         {
